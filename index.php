@@ -1,18 +1,12 @@
 <?php
 
+require 'controllers/Controller.php';
+require 'controllers/ErrorController.php';
 require 'controllers/HomeController.php';
+require 'Router.php';
 require 'vendor/autoload.php';
 
-try {
-    if (false === isset($_GET['p'])) {
-        $homeController = new HomeController();
-        $homeController->viewHome();
-    } elseif ('home' === $_GET['p']) {
-        $homeController = new HomeController();
-        $homeController->viewHome();
-    } else {
-        throw new Exception('Unknown page');
-    }
-} catch(Exception $e) {
-    echo 'Error : ' . $e->getMessage();
-}
+use dbourni\OpenclassroomsP5\Router;
+
+$router = new Router();
+$router->start();
