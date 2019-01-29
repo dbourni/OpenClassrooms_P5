@@ -17,8 +17,6 @@ class Router
 
     /**
      * Instantiates the controllers
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -28,8 +26,6 @@ class Router
 
     /**
      * Routing
-     *
-     * @return void
      */
     public function start()
     {
@@ -41,6 +37,9 @@ class Router
         switch ($_GET['p']) {
             case 'home':
                 $this->homeController->viewHome();
+                break;
+            case 'sendemail':
+                $this->homeController->sendEmail($_POST['email'], $_POST['name'], $_POST['message']);
                 break;
             default:
                 $this->errorController->pageNotFound($_GET['p']);
