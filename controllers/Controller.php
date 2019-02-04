@@ -12,8 +12,6 @@ class Controller
     
     /**
      * Instantiates the Twig attribute
-     *
-     * @return void
      */
     public function __construct()
     {
