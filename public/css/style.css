@@ -125,4 +125,73 @@ body {
     background-color: white;
     color: #2C3E50;
   }
-  
+
+  #error {
+    padding-top: 3em;
+    padding-bottom: 4rem;
+    background-color: white;
+    color: #2C3E50;
+  }
+
+  #listposts {
+    padding-top: 2em;
+    padding-bottom: 2em;
+    background-color: white;
+  }
+
+  #imglistposts {
+    padding-top: 1.5em;
+  }
+
+  #contentlistposts {
+    padding-left: 30px;
+    padding-top: 1.5em;
+    color: #2C3E50;
+  }
+
+  #titleRow {
+    border-style: dashed;
+    border-width: 1px;
+    border-color: #18BC9C;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    padding-bottom: 0px;
+  }
+
+  #pagination {
+    justify-content: center;
+  }
+
+  #followingBtn {
+    margin-top: 10px;
+  }
+
+  #viewpost {
+    color: #2C3E50;
+  }
+
+  #viewpost_title {
+    padding-top: 2em;
+    border-style: dashed;
+    border-width: 1px;
+    border-color: #18BC9C;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+  }
+
+  #viewpost_title h1 {
+    text-align: center;
+  }
+
+  #viewpost_subtitle {
+    padding-bottom: 1em;
+    text-align: center;
+  }
+
+  #viewpost_content {
+    padding-top: 2em;
+    padding-bottom: 2em;
+    text-align: justify;
+  }

@@ -1,2 +1,11 @@
-Error.</br>
-{{ message }}
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <header class="text-center" id="error">
+        <div class="container">
+            <i class="fas fa-exclamation-triangle fa-9x"></i>
+            <h1>Erreur</h1>
+            <h2>{{ message }}</h2>
+        </div>
+    </header>
+{% endblock %}

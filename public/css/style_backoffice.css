@@ -1,0 +1,40 @@
+body, html {
+  height:100%;
+}
+
+#tdb {
+    padding-top: 2em;
+}
+
+#cards {
+    padding-top: 2em;
+}
+
+.card-title {
+    font-size: xx-large;
+}
+
+.card-body {
+    text-align: center;
+}
+
+#PostsList {
+    padding-top: 2em;
+}
+
+#PostsList h1 {
+    padding-bottom: 1em;
+}
+
+#PostsList a {
+    margin-left: 15px;
+}
+
+#PostEdit {
+    padding-top: 2em;
+}
+
+#PostEdit img {
+    padding-bottom: 2em;
+    padding-top: 2em;
+}

@@ -2,26 +2,23 @@
 
 namespace dbourni\OpenclassroomsP5;
 
-use dbourni\OpenclassroomsP5\ErrorController;
-use dbourni\OpenclassroomsP5\HomeController;
-
 /**
  * Routing class
+ * Class Router
+ * @package dbourni\OpenclassroomsP5
  */
 class Router
 {
-    /** @var HomeController */
     private $homeController;
-    /** @var ErrorController */
-    private $errorController;
+    private $postController;
 
     /**
-     * Instantiates the controllers
+     * Router constructor.
      */
     public function __construct()
     {
         $this->homeController = new HomeController();
-        $this->errorController = new ErrorController();
+        $this->postController = new PostController();
     }
 
     /**
@@ -41,10 +38,54 @@ class Router
             case 'sendemail':
                 $this->homeController->sendEmail($_POST['email'], $_POST['name'], $_POST['message']);
                 break;
+            case 'list':
+                $this->postController->viewList();
+                break;
+            case 'view':
+                if (isset($_GET['post'])) {
+                    $this->postController->viewPost($_GET['post']);
+                } else {
+                    $this->postController->displayError('Une erreur s\'est produite !');
+                }
+                break;
+            case 'backoffice':
+                $this->homeController->viewBackoffice();
+                break;
+            case 'backofficePostsList':
+                $this->postController->backofficePostsList();
+                break;
+            case 'newPost':
+                $this->postController->newPost();
+                break;
+            case 'savePost':
+                $this->postController->savePost();
+                break;
+            case 'editPost':
+                if (isset($_GET['post'])) {
+                    $this->postController->editPost($_GET['post']);
+                } else {
+                    $this->postController->displayError('Une erreur s\'est produite !');
+                }
+                break;
+            case 'updatePost':
+                if (isset($_GET['post'])) {
+                    $this->postController->updatePost($_GET['post']);
+                } else {
+                    $this->postController->displayError('Une erreur s\'est produite !');
+                }
+                break;
+            case 'deletePost':
+                if (isset($_GET['post'])) {
+                    $this->postController->deletePost($_GET['post']);
+                } else {
+                    $this->postController->displayError('Une erreur s\'est produite !');
+                }
+                break;
             default:
-                $this->errorController->pageNotFound($_GET['p']);
+                $this->homeController->displayError('La page n\'existe pas');
                 break;
         }
     
     }
 }
+

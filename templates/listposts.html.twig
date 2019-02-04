@@ -1,0 +1,38 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <section>
+        <div class="container">
+            <div class="row" id="listposts">
+                {% for post in posts %}
+                    <div class="col-lg-4" id="imglistposts">
+                        <img src={{ post.image }} alt="image" class="img-fluid rounded">
+                    </div>
+                    <div class="col-lg-8" id="contentlistposts">
+                        <div class="row" id="titleRow">
+                            <h3>{{ post.title }}</h3>
+                        </div>
+                        <div class="row">
+                            <p><i class="far fa-user"></i> {{ post.name }} <i class="far fa-clock"></i> {{ post.date_post }}</p>
+                        </div>
+                        <div class="row">
+                            {{ post.chapo }}
+                        </div>
+                        <div class="row">
+                            <a class="btn btn-outline-success btn-sm" href="index.php?p=view&post={{ post.id_post }}" role="button" id="followingBtn">Lire la suite...</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="row" id="pagination">
+                <nav>
+                    <ul class="pagination">
+                        {% for i in 1..nbpages %}
+                            <li class="page-item"><a class="page-link" href="index.php?p=list&page={{ i }}">{{ i }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </section>
+{% endblock %}
