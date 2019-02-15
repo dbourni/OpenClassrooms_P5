@@ -5,6 +5,11 @@
 
 namespace dbourni\OpenclassroomsP5;
 
+/**
+ * Class HomeController
+ *
+ * @package dbourni\OpenclassroomsP5
+ */
 class HomeController extends Controller
 {
     /**
@@ -22,17 +27,20 @@ class HomeController extends Controller
      */
     public function viewBackoffice()
     {
-        $postManager = new PostManager();
-        $nbPosts = $postManager->countPosts();
+        $nbPosts = (new PostManager())->countPosts();
+
+        $nbComments = (new CommentManager())->countComments();
 
         $this->render('backoffice.html.twig', [
             'title' => 'Blog de David - Back-Office',
             'nbArticle' => $nbPosts,
+            'nbComments' => $nbComments,
         ]);
     }
 
     /**
      * Send an email with the form
+     *
      * @param string $to
      * @param string $name
      * @param string $message
