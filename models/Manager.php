@@ -3,8 +3,13 @@
  * Main manager
  */
 
-namespace dbourni\OpenclassroomsP5;
+namespace OpenclassroomsP5\models;
 
+/**
+ * Class Manager
+ *
+ * @package dbourni\OpenclassroomsP5
+ */
 abstract class Manager
 {
     protected $db;

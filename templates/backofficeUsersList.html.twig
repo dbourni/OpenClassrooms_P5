@@ -1,0 +1,46 @@
+{% extends 'backofficeLayout.html.twig' %}
+
+{% block head %}
+    {{ parent() }}
+    <script language="javascript">
+        function del(id)
+        {
+            if (confirm("voulez vous supprimer?"))
+                location.replace("index.php?p=deleteUser&user="+id);
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container" id="PostsList">
+        <h1><b>Liste des utilisateurs</b></h1>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Nom</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.role }}</td>
+                        <td width="150px">
+                            <a href="index.php?p=editUser&user={{ user.user_id }}"><i class="fas fa-edit"></i></a>
+                            <a href="javascript:del({{ user.user_id }})"><i class="fas fa-trash-alt"></i></a>
+                            {% if user.validated != TRUE %}
+                                <a href="index.php?p=validUser&user={{ user.user_id }}"><i class="fas fa-check"></i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

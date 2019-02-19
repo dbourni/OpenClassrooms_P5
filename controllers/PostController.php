@@ -1,10 +1,18 @@
 <?php
 /**
- * Controller for the list of posts
+ * Posts controller
  */
 
-namespace dbourni\OpenclassroomsP5;
+namespace OpenclassroomsP5\Controllers;
 
+use OpenclassroomsP5\Models\PostManager;
+use OpenclassroomsP5\Models\UserManager;
+
+/**
+ * Class PostController
+ *
+ * @package dbourni\OpenclassroomsP5
+ */
 class PostController extends Controller
 {
     /**
@@ -31,7 +39,6 @@ class PostController extends Controller
         $posts = $this->postManager->getPosts($firstPost, 5);
 
         $this->render('listposts.html.twig', [
-            'title' => 'Blog de David - Blog',
             'posts' => $posts,
             'nbpages' => $this->nbPages(),
         ]);
@@ -39,20 +46,26 @@ class PostController extends Controller
 
     /**
      * Display a single post
+     *
      * @param int $id
      */
     public function viewPost(int $id)
     {
         $post = $this->postManager->getPost($id);
 
+        $commentController = new CommentController();
+        $comments = $commentController->listForPost($id);
+
         $this->render('viewpost.html.twig', [
-            'title' => 'Blog de David - Blog',
             'post' => $post,
+            'comments' => $comments,
+            'post_id' => $id,
         ]);
     }
 
     /**
      * Return the number of posts
+     *
      * @return float|int
      */
     public function nbPages()
@@ -75,7 +88,6 @@ class PostController extends Controller
         $posts = $this->postManager->getPosts(0, 20);
 
         $this->render('backofficePostsList.html.twig', [
-            'title' => 'Blog de David - Back-Office',
             'posts' => $posts,
         ]);
     }
@@ -86,7 +98,6 @@ class PostController extends Controller
     public function newPost()
     {
         $this->render('backofficePostEdit.html.twig', [
-            'title' => 'Blog de David - Back-Office',
             'action' => 'index.php?p=savePost',
             'header' => 'Nouvel article',
         ]);
@@ -99,7 +110,7 @@ class PostController extends Controller
     {
         $image = $this->uploadImage();
 
-        if (!$this->postManager->insertPost($_POST['title'], $_POST['chapo'], $_POST['content'], 1, $image)) {
+        if (!$this->postManager->insertPost($_POST['title'], $_POST['chapo'], $_POST['content'], $_SESSION['user_id'], $image)) {
             $this->displayError('Une erreur s\'est produite !');
             return;
         }
@@ -108,15 +119,17 @@ class PostController extends Controller
 
     /**
      * Edit a post
+     *
      * @param int $id
      */
     public function editPost(int $id)
     {
         $post = $this->postManager->getPost($id);
+        $users = (new UserManager())->getUsers();
 
         $this->render('backofficePostEdit.html.twig', [
-            'title' => 'Blog de David - Back-Office',
             'post' => $post,
+            'users' => $users,
             'action' => 'index.php?p=updatePost',
             'header' => 'Modification de l\'article',
         ]);
@@ -124,13 +137,14 @@ class PostController extends Controller
 
     /**
      * Update a post
+     *
      * @param int $id
      */
     public function updatePost(int $id)
     {
         $image = $this->uploadImage();
 
-        if (!$this->postManager->updatePost($id, $_POST['title'], $_POST['chapo'], $_POST['content'], 1, $image)) {
+        if (!$this->postManager->updatePost($id, $_POST['title'], $_POST['chapo'], $_POST['content'], $_POST['author'], $image)) {
             $this->displayError('Une erreur s\'est produite !');
             return;
         }
@@ -139,10 +153,13 @@ class PostController extends Controller
 
     /**
      * Delete a post
+     *
      * @param int $id
      */
     public function deletePost(int $id)
     {
+        // TODO Delete the comments from the deleted post
+
         if (!$this->postManager->deletePost($id)) {
             $this->displayError('Une erreur s\'est produite !');
             return;
@@ -152,11 +169,12 @@ class PostController extends Controller
 
     /**
      * Upload an image from a form
+     *
      * @return string
      */
     public function uploadImage()
     {
-        if (null == $_FILES['uploadedFile']['name']) {
+        if (null === $_FILES['uploadedFile']['name']) {
             return $_POST['image'];
         }
 
@@ -174,7 +192,7 @@ class PostController extends Controller
             $uploadOk = 0; // The file already exists
         }
 
-        if ($_FILES['uploadedFile']['size'] > 500000) {
+        if ($_FILES['uploadedFile']['size'] > 1500000) {
             $uploadOk = 0; // The file is too large
         }
 
@@ -182,7 +200,7 @@ class PostController extends Controller
             $uploadOk = 0; // The type is not accepted
         }
 
-        if (1 == $uploadOk) {
+        if (1 === $uploadOk) {
             move_uploaded_file($_FILES['uploadedFile']['tmp_name'], $target_file);
         }
 
