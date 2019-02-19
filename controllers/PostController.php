@@ -1,10 +1,15 @@
 <?php
 /**
- * Controller for the list of posts
+ * Posts controller
  */
 
 namespace dbourni\OpenclassroomsP5;
 
+/**
+ * Class PostController
+ *
+ * @package dbourni\OpenclassroomsP5
+ */
 class PostController extends Controller
 {
     /**
@@ -39,20 +44,27 @@ class PostController extends Controller
 
     /**
      * Display a single post
+     *
      * @param int $id
      */
     public function viewPost(int $id)
     {
         $post = $this->postManager->getPost($id);
 
+        $commentController = new CommentController();
+        $comments = $commentController->listForPost($id);
+
         $this->render('viewpost.html.twig', [
             'title' => 'Blog de David - Blog',
             'post' => $post,
+            'comments' => $comments,
+            'post_id' => $id,
         ]);
     }
 
     /**
      * Return the number of posts
+     *
      * @return float|int
      */
     public function nbPages()
@@ -108,6 +120,7 @@ class PostController extends Controller
 
     /**
      * Edit a post
+     *
      * @param int $id
      */
     public function editPost(int $id)
@@ -124,6 +137,7 @@ class PostController extends Controller
 
     /**
      * Update a post
+     *
      * @param int $id
      */
     public function updatePost(int $id)
@@ -139,10 +153,13 @@ class PostController extends Controller
 
     /**
      * Delete a post
+     *
      * @param int $id
      */
     public function deletePost(int $id)
     {
+        // TODO Delete the comments from the deleted post
+
         if (!$this->postManager->deletePost($id)) {
             $this->displayError('Une erreur s\'est produite !');
             return;
@@ -152,6 +169,7 @@ class PostController extends Controller
 
     /**
      * Upload an image from a form
+     *
      * @return string
      */
     public function uploadImage()

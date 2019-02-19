@@ -5,6 +5,11 @@
 
 namespace dbourni\OpenclassroomsP5;
 
+/**
+ * Class Controller
+ *
+ * @package dbourni\OpenclassroomsP5
+ */
 abstract class Controller
 {
     /**
@@ -26,7 +31,9 @@ abstract class Controller
 
     /**
      * Render the twig file with the parameters
+     *
      * @param string $twigFile
+     *
      * @param array $parameters
      */
     public function render(string $twigFile, array $parameters)
@@ -34,12 +41,13 @@ abstract class Controller
         try {
             echo $this->twig->render($twigFile, $parameters);
         } catch (\Exception $e) {
-            $this->displayError('Cette page n\'existe pas.');
+            $this->displayError('Cette page n\'existe pas...');
         }
     }
 
     /**
      * Display an error
+     *
      * @param string $e
      */
     public function displayError(string $e)

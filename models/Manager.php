@@ -5,6 +5,11 @@
 
 namespace dbourni\OpenclassroomsP5;
 
+/**
+ * Class Manager
+ *
+ * @package dbourni\OpenclassroomsP5
+ */
 abstract class Manager
 {
     protected $db;

@@ -5,12 +5,14 @@ namespace dbourni\OpenclassroomsP5;
 /**
  * Routing class
  * Class Router
+ *
  * @package dbourni\OpenclassroomsP5
  */
 class Router
 {
     private $homeController;
     private $postController;
+    private $commentController;
 
     /**
      * Router constructor.
@@ -19,6 +21,7 @@ class Router
     {
         $this->homeController = new HomeController();
         $this->postController = new PostController();
+        $this->commentController = new CommentController();
     }
 
     /**
@@ -44,9 +47,9 @@ class Router
             case 'view':
                 if (isset($_GET['post'])) {
                     $this->postController->viewPost($_GET['post']);
-                } else {
-                    $this->postController->displayError('Une erreur s\'est produite !');
+                    break;
                 }
+                $this->postController->displayError('Article inexistant !');
                 break;
             case 'backoffice':
                 $this->homeController->viewBackoffice();
@@ -63,23 +66,47 @@ class Router
             case 'editPost':
                 if (isset($_GET['post'])) {
                     $this->postController->editPost($_GET['post']);
-                } else {
-                    $this->postController->displayError('Une erreur s\'est produite !');
+                    break;
                 }
+                $this->postController->displayError('Une erreur s\'est produite lors de l\'édition de l\'article!');
                 break;
             case 'updatePost':
                 if (isset($_GET['post'])) {
                     $this->postController->updatePost($_GET['post']);
-                } else {
-                    $this->postController->displayError('Une erreur s\'est produite !');
+                    break;
                 }
+                $this->postController->displayError('Une erreur s\'est produite lors de la mise à jour de l\'article!');
                 break;
             case 'deletePost':
                 if (isset($_GET['post'])) {
                     $this->postController->deletePost($_GET['post']);
-                } else {
-                    $this->postController->displayError('Une erreur s\'est produite !');
+                    break;
                 }
+                $this->postController->displayError('Une erreur s\'est produite lors de la suppression de l\'article!');
+                break;
+            case 'saveComment':
+                if (isset($_GET['post'])) {
+                    $this->commentController->saveComment($_GET['post']);
+                    break;
+                }
+                $this->commentController->displayError('Une erreur s\'est produite lors de l\'enregistrement du commentaire!');
+                break;
+            case 'backofficeCommentsList':
+                $this->commentController->backofficeCommentsList();
+                break;
+            case 'validComment':
+                if (isset($_GET['comment'])) {
+                    $this->commentController->validComment($_GET['comment']);
+                    break;
+                }
+                $this->commentController->displayError('Une erreur s\'est produite lors de la validation du commentaire!');
+                break;
+            case 'deleteComment':
+                if (isset($_GET['comment'])) {
+                    $this->commentController->deleteComment($_GET['comment']);
+                    break;
+                }
+                $this->commentController->displayError('Une erreur s\'est produite lors de la suppression du commentaire !');
                 break;
             default:
                 $this->homeController->displayError('La page n\'existe pas');

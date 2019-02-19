@@ -5,12 +5,19 @@
 
 namespace dbourni\OpenclassroomsP5;
 
+/**
+ * Class PostManager
+ *
+ * @package dbourni\OpenclassroomsP5
+ */
 class PostManager extends Manager
 {
     /**
      * Return the 5 last posts
+     *
      * @param int $firstPost
      * @param int $nbPosts
+     *
      * @return bool|\PDOStatement
      */
     public function getPosts(int $firstPost, int $nbPosts)
@@ -28,7 +35,8 @@ class PostManager extends Manager
     }
 
     /**
-     * Return the count of pages
+     * Return the count of posts
+     *
      * @return int
      */
     public function countPosts()
@@ -42,7 +50,9 @@ class PostManager extends Manager
 
     /**
      * Return a single post
+     *
      * @param int $id
+     *
      * @return mixed
      */
     public function getPost(int $id) {
@@ -56,11 +66,14 @@ class PostManager extends Manager
     }
 
     /**
+     * Insert a new post
+     *
      * @param string $title
      * @param string $chapo
      * @param string $content
      * @param int $author_id
      * @param string $image
+     *
      * @return bool
      */
     public function insertPost(string $title, string $chapo, string $content, int $author_id, string $image)
@@ -71,7 +84,6 @@ class PostManager extends Manager
 
         $req = $this->db->prepare('INSERT INTO posts (title, chapo, author_id, date, content, image)
                                     VALUES (:title, :chapo, :author_id, :date_post, :content, :image)');
-                                    //posts.id as id_post, posts.title, posts.chapo, posts.author_id, DATE_FORMAT(posts.date, \'%d %M %Y\') AS date_post, posts.content, posts.image, users.id, users.name);
         $req->bindParam(':title', $title, \PDO::PARAM_STR);
         $req->bindParam(':chapo', $chapo, \PDO::PARAM_STR);
         $req->bindParam(':author_id', $author_id, \PDO::PARAM_INT);
@@ -84,12 +96,14 @@ class PostManager extends Manager
 
     /**
      * Update a post
+     *
      * @param int $post_id
      * @param string $title
      * @param string $chapo
      * @param string $content
      * @param int $author_id
      * @param string $image
+     *
      * @return bool
      */
     public function updatePost(int $post_id, string $title, string $chapo, string $content, int $author_id, string $image)
@@ -114,7 +128,9 @@ class PostManager extends Manager
 
     /**
      * Delete a post
+     *
      * @param int $post_id
+     *
      * @return bool
      */
     public function deletePost(int $post_id)
