@@ -32,14 +32,17 @@ class UserController extends Controller
      */
     public function connect()
     {
-        $user = $this->userManager->getUserByName($_POST['name']);
+        $post_name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
+        $post_password = filter_input(INPUT_POST, 'password');
 
-        if (!password_verify($_POST['password'], $user['password'])) {
+        $user = $this->userManager->getUserByName($post_name);
+
+        if (!password_verify($post_password, $user['password'])) {
             $this->displayError('Votre nom ou votre mot de passe sont erronnés !');
             return;
         }
 
-        $_SESSION['name'] = $_POST['name'];
+        $_SESSION['name'] = $post_name;
         $_SESSION['role'] = $user['role'];
         $_SESSION['user_id'] = $user['user_id'];
 
@@ -197,7 +200,7 @@ class UserController extends Controller
     }
 
     /**
-     * Displays the form for a forgotten pawword
+     * Displays the form for a forgotten password
      */
     public function forgottenPassword()
     {
@@ -237,6 +240,7 @@ class UserController extends Controller
 
     /**
      * Displays the form for modify a password
+     *
      * @param string $code
      */
     public function modifyPassword(string $code)

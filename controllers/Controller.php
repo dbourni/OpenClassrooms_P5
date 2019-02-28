@@ -68,23 +68,11 @@ abstract class Controller
      */
     public function checkRights(string $path)
     {
-//        $freeRights = ['sendemail', 'connection', 'disconnection', 'view', 'connect', 'subscription',
-//            'saveSubscription', 'forgottenPassword', 'initPassword', 'modifyPassword', 'saveNewPassword'];
         $readerRights = ['saveComment'];
         $editorRights = array_merge($readerRights, ['backoffice', 'backofficePostsList', 'newPost', 'savePost', 'editPost',
             'updatePost', 'deletePost']);
         $adminRights = array_merge($editorRights, ['backofficeCommentsList', 'validComment', 'deleteComment', 'backofficeUsersList',
             'deleteUser', 'editUser', 'updateUser', 'newUser', 'saveUser', 'validUser']);
-
-//        $adminRights = ['home', 'sendemail', 'connection', 'disconnection', 'list', 'view', 'backoffice', 'backofficePostsList',
-//            'newPost', 'savePost', 'editPost', 'updatePost', 'deletePost', 'saveComment', 'backofficeCommentsList',
-//            'validComment', 'deleteComment', 'backofficeUsersList', 'deleteUser', 'editUser', 'updateUser', 'newUser',
-//            'saveUser', 'connect', 'validUser'];
-//        $editorRights = ['home', 'sendemail', 'connection', 'disconnection', 'list', 'view', 'backoffice', 'backofficePostsList',
-//            'newPost', 'savePost', 'editPost', 'updatePost', 'deletePost', 'saveComment', 'connect'];
-//        $readerRights = ['home', 'sendemail', 'connection', 'disconnection', 'list', 'view', 'saveComment', 'connect'];
-//        $freeRights = ['home', 'sendemail', 'connection', 'disconnection', 'list', 'view', 'connect', 'subscription',
-//            'saveSubscription', 'forgottenPassword', 'initPassword', 'modifyPassword', 'saveNewPassword'];
 
         $right = false;
 
@@ -107,11 +95,6 @@ abstract class Controller
             default:
                 $right = FALSE;
                 break;
-//            case '':
-//                if (in_array($path, $freeRights)) {
-//                    $right = true;
-//                }
-//                break;
         }
 
         return $right;

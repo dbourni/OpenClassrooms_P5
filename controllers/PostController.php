@@ -5,6 +5,7 @@
 
 namespace OpenclassroomsP5\Controllers;
 
+use OpenclassroomsP5\Models\CommentManager;
 use OpenclassroomsP5\Models\PostManager;
 use OpenclassroomsP5\Models\UserManager;
 
@@ -158,12 +159,17 @@ class PostController extends Controller
      */
     public function deletePost(int $id)
     {
-        // TODO Delete the comments from the deleted post
-
         if (!$this->postManager->deletePost($id)) {
             $this->displayError('Une erreur s\'est produite !');
             return;
         }
+
+        // Delete the comments for this post
+        if (!(new CommentManager())->deleteCommentsForPost($id)) {
+            $this->displayError('Une erreur s\'est produite !');
+            return;
+        }
+
         $this->backofficePostsList();
     }
 
@@ -174,7 +180,7 @@ class PostController extends Controller
      */
     public function uploadImage()
     {
-        if (null === $_FILES['uploadedFile']['name']) {
+        if (null == $_FILES['uploadedFile']['name']) {
             return $_POST['image'];
         }
 
