@@ -3,7 +3,11 @@
  * Homepage controller
  */
 
-namespace dbourni\OpenclassroomsP5;
+namespace OpenclassroomsP5\Controllers;
+
+use OpenclassroomsP5\Models\CommentManager;
+use OpenclassroomsP5\Models\PostManager;
+use OpenclassroomsP5\Models\UserManager;
 
 /**
  * Class HomeController
@@ -17,9 +21,7 @@ class HomeController extends Controller
      */
     public function viewHome()
     {
-        $this->render('home.html.twig', [
-            'title' => 'Blog de David - Accueil',
-        ]);
+        $this->render('home.html.twig', []);
     }
 
     /**
@@ -28,13 +30,13 @@ class HomeController extends Controller
     public function viewBackoffice()
     {
         $nbPosts = (new PostManager())->countPosts();
-
         $nbComments = (new CommentManager())->countComments();
+        $nbUsers = (new UserManager())->countUsers();
 
         $this->render('backoffice.html.twig', [
-            'title' => 'Blog de David - Back-Office',
             'nbArticle' => $nbPosts,
             'nbComments' => $nbComments,
+            'nbUsers' => $nbUsers,
         ]);
     }
 
@@ -51,11 +53,17 @@ class HomeController extends Controller
             $object = 'Email envoyé par le formulaire de votre site de ' . $name;
             mail($to, $object, $message);
             
-            echo $this->twig->render('sentemail.html.twig', [
-                'title' => 'Blog de David - Email envoyé'
-            ]);
+            echo $this->twig->render('sentemail.html.twig', []);
         } catch (\Exception $e) {
             $this->displayError($e);
         }
+    }
+
+    /**
+     * Display the connection form
+     */
+    public function viewConnect()
+    {
+        $this->render('connect.html.twig', []);
     }
 }

@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     {% block head %}
-        <title>{{ title }}</title>
+        <title>Blog de David</title>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -39,6 +39,23 @@
             <li class="nav-item">
               <a class="nav-link" href="index.php?p=list">Blog</a>
             </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-user"></i>
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                {% if session.role is empty %}
+                  <a class="dropdown-item" href="index.php?p=connection">Se connecter</a>
+                  <a class="dropdown-item" href="index.php?p=subscription">S'inscrire</a>
+                {% endif %}
+                {% if session.role is not empty %}
+                  <a class="dropdown-item" href="index.php?p=disconnection">Se déconnecter</a>
+                {% endif %}
+                {% if session.role in ['admin', 'editor'] %}
+                  <a class="dropdown-item" href="index.php?p=backoffice">Back-office</a>
+                {% endif %}
+              </div>
+            </li>
           </ul>
         </div>
       </div>
@@ -65,7 +82,11 @@
           </div>
           <div class="col-md-4 mb-2">
             <h5>ADMINISTRATION</h5>
-            <p><a href="index.php?p=backoffice">Accès au backoffice</a></p>
+            {% if role in ['admin', 'editor'] %}
+              <p><a href="index.php?p=backoffice">Accès au backoffice</a></p>
+            {% else %}
+              <p>Accès réservé</p>
+            {% endif %}
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@
  * Main controller
  */
 
-namespace dbourni\OpenclassroomsP5;
+namespace OpenclassroomsP5\Controllers;
 
 /**
  * Class Controller
@@ -25,8 +25,10 @@ abstract class Controller
     {
         $loader = new \Twig_Loader_Filesystem('.\templates');
         $this->twig = new \Twig_Environment($loader, [
-            'cache' => false //'.\tmp'    
+            'cache' => false, //'.\tmp'
+            'auto_reload' => true,
         ]);
+        $this->twig->addGlobal('session', $_SESSION);
     }
 
     /**
@@ -53,7 +55,48 @@ abstract class Controller
     public function displayError(string $e)
     {
         $this->render('error.html.twig', [
-            'message' => $e
+            'message' => $e,
         ]);
+    }
+
+    /**
+     * Checks the user rights
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    public function checkRights(string $path)
+    {
+        $readerRights = ['saveComment'];
+        $editorRights = array_merge($readerRights, ['backoffice', 'backofficePostsList', 'newPost', 'savePost', 'editPost',
+            'updatePost', 'deletePost']);
+        $adminRights = array_merge($editorRights, ['backofficeCommentsList', 'validComment', 'deleteComment', 'backofficeUsersList',
+            'deleteUser', 'editUser', 'updateUser', 'newUser', 'saveUser', 'validUser']);
+
+        $right = false;
+
+        switch ($_SESSION['role']) {
+            case 'admin':
+                if (in_array($path, $adminRights)) {
+                    $right = true;
+                }
+                break;
+            case 'editor':
+                if (in_array($path, $editorRights)) {
+                    $right = true;
+                }
+                break;
+            case 'reader':
+                if (in_array($path, $readerRights)) {
+                    $right = true;
+                }
+                break;
+            default:
+                $right = FALSE;
+                break;
+        }
+
+        return $right;
     }
 }

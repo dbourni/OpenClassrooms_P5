@@ -1,0 +1,28 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <div class="container" id="connect">
+        <form method="post" action="index.php?p=connect">
+            <div class="row justify-content-center">
+                <div class="form-group col-sm-6">
+                    <label for="name">Nom / pseudo</label>
+                    <input type="text" class="form-control" name="name" id="name" value="" placeholder="" required>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="form-group col-sm-6">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" class="form-control" name="password" id="password" value="" placeholder="" required>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="form-group col-sm-6 d-flex justify-content-center">
+                    <button type="submit" id="form-submit" class="btn btn-lg rounded border-primary">Connexion</button>
+                </div>
+            </div>
+        </form>
+        <div class="col-sm-12 d-flex justify-content-center">
+            <p><a href="index.php?p=forgottenPassword">Mot de passe oublié ?</a></p>
+        </div>
+    </div>
+{% endblock %}

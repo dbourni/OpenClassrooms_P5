@@ -3,7 +3,9 @@
  * Comments controller
  */
 
-namespace dbourni\OpenclassroomsP5;
+namespace OpenclassroomsP5\Controllers;
+
+use OpenclassroomsP5\Models\CommentManager;
 
 /**
  * Class CommentController
@@ -45,9 +47,7 @@ class CommentController extends Controller
      */
     public function saveComment(int $post_id)
     {
-        // TODO Send the current user ID
-
-        if (!$this->commentManager->insertComment($post_id, $_POST['comment'], 1)) {
+        if (!$this->commentManager->insertComment($post_id, $_POST['comment'], $_SESSION['user_id'])) {
             $this->displayError('Une erreur s\'est produite !');
 
             return;
@@ -64,7 +64,6 @@ class CommentController extends Controller
         $comments = $this->commentManager->getUnvalidatedComments();
 
         $this->render('backofficeCommentsList.html.twig', [
-            'title' => 'Blog de David - Back-Office',
             'comments' => $comments,
         ]);
     }

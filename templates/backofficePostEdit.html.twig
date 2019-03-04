@@ -14,7 +14,11 @@
                 </div>
                 <div class="form-group col-sm-6">
                     <label for="author" class="h4">Auteur</label>
-                    <input type="text" class="form-control" name="author" id="author" value="{{ post.author_id }}" placeholder="Auteur de l'article" required>
+                    <select class="form-control" name="author" id="author" required>
+                        {% for user in users %}
+                            <option value="{{ user.user_id }}" {{ user.user_id == post.author_id ? 'selected' }}>{{ user.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="form-group col-sm-6">
                     <label for="uploadedFile" class="h4">Image (jpeg max 500KB)</label>

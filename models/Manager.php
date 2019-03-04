@@ -3,7 +3,9 @@
  * Main manager
  */
 
-namespace dbourni\OpenclassroomsP5;
+namespace OpenclassroomsP5\Models;
+
+use PDO;
 
 /**
  * Class Manager
@@ -12,13 +14,13 @@ namespace dbourni\OpenclassroomsP5;
  */
 abstract class Manager
 {
-    protected $db;
+    protected $dbase;
 
     /**
      * Manager constructor.
      */
     public function __construct()
     {
-        $this->db = new \PDO(DB_HOST, DB_USER, DB_PASSWORD);
+        $this->dbase = new PDO(DB_HOST, DB_USER, DB_PASSWORD);
     }
 }

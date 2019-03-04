@@ -34,20 +34,22 @@
                     </div>
                 </div>
             {% endfor %}
-            <div class="row justify-content-center">
-                <div class="col-xl-8">
-                <form method="post" action="index.php?p=saveComment&post={{ post_id }}">
-                    <div class="form-group">
-                        <label for="comment" class="h4">Votre commentaire</label>
-                        <textarea id="comment" class="form-control flex" name="comment" rows="3" required></textarea>
-                        Votre commentaire sera publié après validation. Merci de votre patience.
+            {% if session.role in ['admin', 'editor', 'reader'] %}
+                <div class="row justify-content-center">
+                    <div class="col-xl-8">
+                    <form method="post" action="index.php?p=saveComment&post={{ post_id }}">
+                        <div class="form-group">
+                            <label for="comment" class="h4">Votre commentaire</label>
+                            <textarea id="comment" class="form-control flex" name="comment" rows="3" required></textarea>
+                            Votre commentaire sera publié après validation. Merci de votre patience.
+                        </div>
+                        <div class="form-group col-sm-12 d-flex justify-content-center">
+                            <button type="submit" id="form-submit" class="btn btn-lg rounded border-primary">Enregistrer</button>
+                        </div>
+                    </form>
                     </div>
-                    <div class="form-group col-sm-12 d-flex justify-content-center">
-                        <button type="submit" id="form-submit" class="btn btn-lg rounded border-primary">Enregistrer</button>
-                    </div>
-                </form>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </section>
 {% endblock %}
