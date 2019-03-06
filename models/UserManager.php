@@ -35,11 +35,11 @@ class UserManager extends Manager
      *
      * @return mixed
      */
-    public function getUser(int $user_id) {
+    public function getUser(int $userId) {
         $req = $this->dbase->prepare('SELECT users.id as user_id, users.name, users.email, users.role, users.password
                             FROM users
                             WHERE users.id = :user_id');
-        $req->bindParam(':user_id', $user_id, \PDO::PARAM_INT);
+        $req->bindParam(':user_id', $userId, \PDO::PARAM_INT);
         $req->execute();
 
         return $req->fetch();
@@ -52,11 +52,11 @@ class UserManager extends Manager
      *
      * @return mixed
      */
-    public function getUserByName(string $user_name) {
+    public function getUserByName(string $userName) {
         $req = $this->dbase->prepare('SELECT users.id as user_id, users.name, users.email, users.role, users.password, users.init_key
                             FROM users
                             WHERE users.name = :user_name');
-        $req->bindParam(':user_name', $user_name, \PDO::PARAM_STR);
+        $req->bindParam(':user_name', $userName, \PDO::PARAM_STR);
         $req->execute();
 
         return $req->fetch();
@@ -69,11 +69,11 @@ class UserManager extends Manager
      *
      * @return bool
      */
-    public function deleteUser(int $user_id)
+    public function deleteUser(int $userId)
     {
         $req = $this->dbase->prepare('DELETE FROM users 
                                     WHERE users.id = :user_id');
-        $req->bindParam(':user_id', $user_id, \PDO::PARAM_INT);
+        $req->bindParam(':user_id', $userId, \PDO::PARAM_INT);
 
         return $req->execute();
     }
@@ -89,16 +89,24 @@ class UserManager extends Manager
      *
      * @return bool
      */
-    public function updateUser(int $user_id, string $name, string $email, string $role, string $password)
+    public function updateUser(int $userId, string $name, string $email, string $role, string $password)
     {
         $req = $this->dbase->prepare('UPDATE users 
-                                    SET users.name = :name, users.email = :email, users.role = :role, users.password = :password
-                                    WHERE users.id = :user_id');
+                                        SET users.name = :name, users.email = :email, users.role = :role, users.password = :password
+                                        WHERE users.id = :user_id');
+
+        if (!$password) {
+            $req = $this->dbase->prepare('UPDATE users 
+                                        SET users.name = :name, users.email = :email, users.role = :role
+                                        WHERE users.id = :user_id');
+        }
         $req->bindParam(':name', $name, \PDO::PARAM_STR);
         $req->bindParam(':email', $email, \PDO::PARAM_STR);
         $req->bindParam(':role', $role, \PDO::PARAM_STR);
-        $req->bindParam(':password', $password, \PDO::PARAM_STR);
-        $req->bindParam(':user_id', $user_id, \PDO::PARAM_INT);
+        if ($password) {
+            $req->bindParam(':password', $password, \PDO::PARAM_STR);
+        }
+        $req->bindParam(':user_id', $userId, \PDO::PARAM_INT);
 
         return $req->execute();
     }
@@ -134,7 +142,7 @@ class UserManager extends Manager
      *
      * @return bool
      */
-    public function validateUser(int $user_id)
+    public function validateUser(int $userId)
     {
         $validated = 1;
 
@@ -142,7 +150,7 @@ class UserManager extends Manager
                                     SET validated = :validated
                                     WHERE users.id = :id');
         $req->bindParam(':validated', $validated, \PDO::PARAM_INT);
-        $req->bindParam(':id', $user_id, \PDO::PARAM_INT);
+        $req->bindParam(':id', $userId, \PDO::PARAM_INT);
 
         return $req->execute();
     }
@@ -155,13 +163,13 @@ class UserManager extends Manager
      *
      * @return bool
      */
-    public function setInitKey(string $user_name, string $init_key)
+    public function setInitKey(string $userName, string $initKey)
     {
         $req = $this->dbase->prepare('UPDATE users 
                                     SET users.init_key = :init_key
                                     WHERE users.name = :user_name');
-        $req->bindParam(':init_key', $init_key, \PDO::PARAM_STR);
-        $req->bindParam(':user_name', $user_name, \PDO::PARAM_STR);
+        $req->bindParam(':init_key', $initKey, \PDO::PARAM_STR);
+        $req->bindParam(':user_name', $userName, \PDO::PARAM_STR);
 
         return $req->execute();
     }
@@ -174,16 +182,16 @@ class UserManager extends Manager
      *
      * @return bool
      */
-    public function setPassword(string $user_name, string $password)
+    public function setPassword(string $userName, string $password)
     {
-        $init_key = '';
+        $initKey = '';
 
         $req = $this->dbase->prepare('UPDATE users 
                                     SET users.password = :password, users.init_key = :init_key
                                     WHERE users.name = :user_name');
         $req->bindParam(':password', $password, \PDO::PARAM_STR);
-        $req->bindParam(':init_key', $init_key, \PDO::PARAM_STR);
-        $req->bindParam(':user_name', $user_name, \PDO::PARAM_STR);
+        $req->bindParam(':init_key', $initKey, \PDO::PARAM_STR);
+        $req->bindParam(':user_name', $userName, \PDO::PARAM_STR);
 
         return $req->execute();
     }

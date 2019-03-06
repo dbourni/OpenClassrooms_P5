@@ -37,7 +37,7 @@
               <a class="nav-link" href="index.php#contact">CONTACT</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="index.php?p=list">Blog</a>
+              <a class="nav-link" href="index.php?p=viewList">Blog</a>
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -45,14 +45,14 @@
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                 {% if session.role is empty %}
-                  <a class="dropdown-item" href="index.php?p=connection">Se connecter</a>
+                  <a class="dropdown-item" href="index.php?p=viewConnect">Se connecter</a>
                   <a class="dropdown-item" href="index.php?p=subscription">S'inscrire</a>
                 {% endif %}
                 {% if session.role is not empty %}
-                  <a class="dropdown-item" href="index.php?p=disconnection">Se déconnecter</a>
+                  <a class="dropdown-item" href="index.php?p=disConnect">Se déconnecter</a>
                 {% endif %}
                 {% if session.role in ['admin', 'editor'] %}
-                  <a class="dropdown-item" href="index.php?p=backoffice">Back-office</a>
+                  <a class="dropdown-item" href="index.php?p=viewBackoffice">Back-office</a>
                 {% endif %}
               </div>
             </li>
@@ -82,8 +82,8 @@
           </div>
           <div class="col-md-4 mb-2">
             <h5>ADMINISTRATION</h5>
-            {% if role in ['admin', 'editor'] %}
-              <p><a href="index.php?p=backoffice">Accès au backoffice</a></p>
+            {% if session.role in ['admin', 'editor'] %}
+              <p><a href="index.php?p=viewBackoffice">Accès au backoffice</a></p>
             {% else %}
               <p>Accès réservé</p>
             {% endif %}

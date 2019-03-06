@@ -23,7 +23,7 @@ abstract class Controller
      */
     public function __construct()
     {
-        $loader = new \Twig_Loader_Filesystem('.\templates');
+        $loader = new \Twig_Loader_Filesystem('templates');
         $this->twig = new \Twig_Environment($loader, [
             'cache' => false, //'.\tmp'
             'auto_reload' => true,
@@ -35,28 +35,42 @@ abstract class Controller
      * Render the twig file with the parameters
      *
      * @param string $twigFile
-     *
      * @param array $parameters
+     *
+     * @return bool
      */
-    public function render(string $twigFile, array $parameters)
+    protected function render(string $twigFile, array $parameters)
     {
         try {
             echo $this->twig->render($twigFile, $parameters);
         } catch (\Exception $e) {
-            $this->displayError('Cette page n\'existe pas...');
+            $this->setErrorMessage('Hey, cette page est inéxistante !');
+            return false;
         }
+
+        return true;
     }
 
     /**
      * Display an error
      *
-     * @param string $e
+     * @param string $errorMessage
      */
-    public function displayError(string $e)
+    public function displayError(string $errorMessage)
     {
         $this->render('error.html.twig', [
-            'message' => $e,
+            'message' => $errorMessage,
         ]);
+    }
+
+    /**
+     * Set the error message displayed by the router
+     *
+     * @param string $errorMessage
+     */
+    protected function setErrorMessage(string $errorMessage)
+    {
+        $GLOBALS['errorMessage'] = $errorMessage;
     }
 
     /**
@@ -69,14 +83,14 @@ abstract class Controller
     public function checkRights(string $path)
     {
         $readerRights = ['saveComment'];
-        $editorRights = array_merge($readerRights, ['backoffice', 'backofficePostsList', 'newPost', 'savePost', 'editPost',
+        $editorRights = array_merge($readerRights, ['viewBackoffice', 'backofficePostsList', 'newPost', 'savePost', 'editPost',
             'updatePost', 'deletePost']);
         $adminRights = array_merge($editorRights, ['backofficeCommentsList', 'validComment', 'deleteComment', 'backofficeUsersList',
             'deleteUser', 'editUser', 'updateUser', 'newUser', 'saveUser', 'validUser']);
 
         $right = false;
 
-        switch ($_SESSION['role']) {
+        switch ($this->getSessionVariable('role')) {
             case 'admin':
                 if (in_array($path, $adminRights)) {
                     $right = true;
@@ -98,5 +112,59 @@ abstract class Controller
         }
 
         return $right;
+    }
+
+    /**
+     * Set the SESSION variable
+     *
+     * @param string $sessionVariable
+     *
+     * @param string $value
+     */
+    public function setSessionVariable(string $sessionVariable, string $value)
+    {
+        $_SESSION[$sessionVariable] = $value;
+    }
+
+    /**
+     * Get the SESSION variable
+     *
+     * @param string $sessionVariable
+     *
+     * @return string|null
+     */
+    public function getSessionVariable(string $sessionVariable)
+    {
+        if (isset($_SESSION[$sessionVariable])) {
+            return $_SESSION[$sessionVariable];
+        }
+
+        return null;
+    }
+
+    /**
+     * Sanitize a string from a $_POST or $_GET
+     *
+     * @param string $type
+     * @param string $stringVariable
+     *
+     * @return string
+     */
+    public function sanitizedString(string $type, string $stringVariable)
+    {
+        return filter_input(constant('INPUT_' . strtoupper($type)), $stringVariable, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+    }
+
+    /**
+     * Sanitize an email from a $_POST or $_GET
+     *
+     * @param string $type
+     * @param string $emailVariable
+     *
+     * @return string
+     */
+    public function sanitizedEmail(string $type, string $emailVariable)
+    {
+        return filter_input(constant('INPUT_' . strtoupper($type)), $emailVariable, FILTER_SANITIZE_EMAIL);
     }
 }

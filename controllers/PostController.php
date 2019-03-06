@@ -32,15 +32,16 @@ class PostController extends Controller
 
     /**
      * Display the list of posts
+     *
+     * @return bool
      */
     public function viewList()
     {
-        $firstPost = isset($_GET['page']) ? ($_GET['page']*5)-5 : 0;
+        $getPage = $this->sanitizedString('get', 'page');
+        $firstPost = isset($getPage) ? ($getPage*5)-5 : 0;
 
-        $posts = $this->postManager->getPosts($firstPost, 5);
-
-        $this->render('listposts.html.twig', [
-            'posts' => $posts,
+        return $this->render('listposts.html.twig', [
+            'posts' => $this->postManager->getPosts($firstPost, 5),
             'nbpages' => $this->nbPages(),
         ]);
     }
@@ -48,19 +49,23 @@ class PostController extends Controller
     /**
      * Display a single post
      *
-     * @param int $id
+     * @param int $postId
+     *
+     * @return bool
      */
-    public function viewPost(int $id)
+    public function viewPost(int $postId)
     {
-        $post = $this->postManager->getPost($id);
+        $post = $this->postManager->getPost($postId);
 
-        $commentController = new CommentController();
-        $comments = $commentController->listForPost($id);
+        if (!$post) {
+            $this->setErrorMessage('La page n\'existe pas.');
+            return false;
+        }
 
-        $this->render('viewpost.html.twig', [
+        return $this->render('viewpost.html.twig', [
             'post' => $post,
-            'comments' => $comments,
-            'post_id' => $id,
+            'comments' => (new CommentController())->listForPost($postId),
+            'post_id' => $postId,
         ]);
     }
 
@@ -73,7 +78,7 @@ class PostController extends Controller
     {
         $nbPosts = $this->postManager->countPosts();
 
-        $nbPages = round($nbPosts/5);
+        $nbPages = floor($nbPosts/5);
         if (0 !== ($nbPosts % 5)) {
             $nbPages++;
         }
@@ -83,22 +88,26 @@ class PostController extends Controller
 
     /**
      * Diplays the list of posts in the back office
+     *
+     * @return bool
      */
     public function backofficePostsList()
     {
-        $posts = $this->postManager->getPosts(0, 20);
-
-        $this->render('backofficePostsList.html.twig', [
-            'posts' => $posts,
+        return $this->render('backofficePostsList.html.twig', [
+            'posts' => $this->postManager->getPosts(0, 20),
         ]);
     }
 
     /**
      * Create a new post
+     *
+     * @return bool
      */
     public function newPost()
     {
-        $this->render('backofficePostEdit.html.twig', [
+        return $this->render('backofficePostEdit.html.twig', [
+            'users' => (new UserManager())->getUsers(),
+            'userId' => $this->getSessionVariable('user_id'),
             'action' => 'index.php?p=savePost',
             'header' => 'Nouvel article',
         ]);
@@ -106,31 +115,42 @@ class PostController extends Controller
 
     /**
      * Save a modified post
+     *
+     * @return bool
      */
     public function savePost()
     {
-        $image = $this->uploadImage();
+        $postTitle = $this->sanitizedString('post', 'title');
+        $postChapo = $this->sanitizedString('post', 'chapo');
+        $postContent = $this->sanitizedString('post', 'content');
 
-        if (!$this->postManager->insertPost($_POST['title'], $_POST['chapo'], $_POST['content'], $_SESSION['user_id'], $image)) {
-            $this->displayError('Une erreur s\'est produite !');
-            return;
+        if (!$this->postManager->insertPost($postTitle, $postChapo, $postContent, $this->getSessionVariable('user_id'), $this->uploadImage())) {
+            $this->setErrorMessage('Impossible d\'enregistrer le billet.');
+            return false;
         }
-        $this->backofficePostsList();
+
+        return $this->backofficePostsList();
     }
 
     /**
      * Edit a post
      *
-     * @param int $id
+     * @param int $PostId
+     *
+     * @return bool
      */
-    public function editPost(int $id)
+    public function editPost(int $postId)
     {
-        $post = $this->postManager->getPost($id);
-        $users = (new UserManager())->getUsers();
+        $post = $this->postManager->getPost($postId);
 
-        $this->render('backofficePostEdit.html.twig', [
+        if (!$post) {
+            $this->setErrorMessage('Le billet n\'existe pas.');
+            return false;
+        }
+
+        return $this->render('backofficePostEdit.html.twig', [
             'post' => $post,
-            'users' => $users,
+            'users' => (new UserManager())->getUsers(),
             'action' => 'index.php?p=updatePost',
             'header' => 'Modification de l\'article',
         ]);
@@ -139,38 +159,53 @@ class PostController extends Controller
     /**
      * Update a post
      *
-     * @param int $id
+     * @param int $PostId
+     *
+     * @return bool
      */
-    public function updatePost(int $id)
+    public function updatePost(int $postId)
     {
+        $postTitle = $this->sanitizedString('post', 'title');
+        $postChapo = $this->sanitizedString('post', 'chapo');
+        $postContent = $this->sanitizedString('post', 'content');
+        $postAuthor = $this->sanitizedString('post', 'author');
+
         $image = $this->uploadImage();
 
-        if (!$this->postManager->updatePost($id, $_POST['title'], $_POST['chapo'], $_POST['content'], $_POST['author'], $image)) {
-            $this->displayError('Une erreur s\'est produite !');
-            return;
+        if (!$this->postManager->updatePost($postId, $postTitle, $postChapo, $postContent, $postAuthor, $image)) {
+            $this->setErrorMessage('Impossible de mettre à jour le billet.');
+            return false;
         }
-        $this->backofficePostsList();
+
+        return $this->backofficePostsList();
     }
 
     /**
      * Delete a post
      *
-     * @param int $id
+     * @param int $PostId
+     *
+     * @return bool
      */
-    public function deletePost(int $id)
+    public function deletePost(int $postId)
     {
-        if (!$this->postManager->deletePost($id)) {
-            $this->displayError('Une erreur s\'est produite !');
-            return;
+        if (!$this->postManager->getPost($postId)) {
+            $this->setErrorMessage('Le billet n\'existe pas.');
+            return false;
+        }
+
+        if (!$this->postManager->deletePost($postId)) {
+            $this->setErrorMessage('Impossible de supprimer le billet');
+            return false;
         }
 
         // Delete the comments for this post
-        if (!(new CommentManager())->deleteCommentsForPost($id)) {
-            $this->displayError('Une erreur s\'est produite !');
-            return;
+        if (!(new CommentManager())->deleteCommentsForPost($postId)) {
+            $this->setErrorMessage('Impossible de supprimer les commentaires liés au billet.');
+            return false;
         }
 
-        $this->backofficePostsList();
+        return $this->backofficePostsList();
     }
 
     /**
@@ -180,16 +215,17 @@ class PostController extends Controller
      */
     public function uploadImage()
     {
-        if (null == $_FILES['uploadedFile']['name']) {
-            return $_POST['image'];
+        $postImage = filter_input(INPUT_POST, 'image');
+
+        if (isset($_FILES['uploadedFile']) AND null == filter_var($_FILES['uploadedFile']['name'], FILTER_SANITIZE_URL	)) {
+            return $postImage;
         }
 
-        $target_dir = 'public/uploads/';
-        $target_file = $target_dir . basename($_FILES['uploadedFile']['name']);
+        $target_file = 'public/uploads/' . basename(filter_var($_FILES['uploadedFile']['name'], FILTER_SANITIZE_URL	));
         $uploadOk = 1;
         $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 
-        $check = getimagesize($_FILES['uploadedFile']['tmp_name']);
+        $check = getimagesize(filter_var($_FILES['uploadedFile']['tmp_name'], FILTER_SANITIZE_URL	));
         if (!$check) {
             $uploadOk = 0; // The file is not an image
         }

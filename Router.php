@@ -49,13 +49,12 @@ class Router
             $route = $this->getRouteWithRights($getP);
         }
 
-        if ($route) {
-            try {
-                $parameters = $route['parameters'];
-                $this->{$route['class']}->{$route['function']}($parameters);
-            } catch (\Throwable $throwable) {
-                $this->homeController->displayError($throwable);
+        if ($route AND $this->getController($route['class'])) {
+            if (!$this->{$this->getController($route['class'])}->{$getP}($route['parameters'])) {
+                $errorMessage = isset($GLOBALS['errorMessage']) ? $GLOBALS['errorMessage'] : '';
+                $this->homeController->displayError('Une erreur est survenue<br>' . $errorMessage);
             }
+
             return;
         }
 
@@ -63,11 +62,11 @@ class Router
     }
 
     /**
-     * Get the route without rights
+     * Return the route without rights
      *
      * @param string $getParameter
      *
-     * @return string
+     * @return array|null
      */
     private function getRouteWithoutRights(string $getParameter)
     {
@@ -77,26 +76,22 @@ class Router
         $postName = filter_input(INPUT_POST, 'name');
         $postMessage = filter_input(INPUT_POST, 'message');
 
-        $routes = array(
-            ['param' => 'home', 'class' => 'homeController', 'function' => 'viewHome', 'parameters' => []],
-            ['param' => 'sendemail', 'class' => 'homeController', 'function' => 'sendEmail', 'parameters' => [$postEmail, $postName, $postMessage]],
-            ['param' => 'connection', 'class' => 'homeController', 'function' => 'viewConnect', 'parameters' => []],
-            ['param' => 'disconnection', 'class' => 'userController', 'function' => 'disConnect', 'parameters' => []],
-            ['param' => 'view', 'class' => 'postController', 'function' => 'viewPost', 'parameters' => $getPost],
-            ['param' => 'list', 'class' => 'postController', 'function' => 'viewList', 'parameters' => []],
-            ['param' => 'connect', 'class' => 'userController', 'function' => 'connect', 'parameters' => []],
-            ['param' => 'subscription', 'class' => 'userController', 'function' => 'subscription', 'parameters' => []],
-            ['param' => 'saveSubscription', 'class' => 'userController', 'function' => 'saveSubscription', 'parameters' => []],
-            ['param' => 'forgottenPassword', 'class' => 'userController', 'function' => 'forgottenPassword', 'parameters' => []],
-            ['param' => 'initPassword', 'class' => 'userController', 'function' => 'initPassword', 'parameters' => []],
-            ['param' => 'modifyPassword', 'class' => 'userController', 'function' => 'modifyPassword', 'parameters' => $getCode],
-            ['param' => 'saveNewPassword', 'class' => 'userController', 'function' => 'saveNewPassword', 'parameters' => []],
-        );
+        $routes = ['viewHome' => ['class' => 'home', 'parameters' => []],
+            'sendEmail' => ['class' => 'home', 'parameters' => [$postEmail, $postName, $postMessage]],
+            'viewConnect' => ['class' => 'home', 'parameters' => []],
+            'disConnect' => ['class' => 'user', 'parameters' => []],
+            'viewPost' => ['class' => 'post', 'parameters' => $getPost],
+            'viewList' => ['class' => 'post', 'parameters' => []],
+            'connect' => ['class' => 'user', 'parameters' => []],
+            'subscription' => ['class' => 'user', 'parameters' => []],
+            'saveSubscription' => ['class' => 'user', 'parameters' => []],
+            'forgottenPassword' => ['class' => 'user', 'parameters' => []],
+            'initPassword' => ['class' => 'user', 'parameters' => []],
+            'modifyPassword' => ['class' => 'user', 'parameters' => $getCode],
+            'saveNewPassword' => ['class' => 'user', 'parameters' => []],];
 
-        $route = array_search($getParameter, array_column($routes, 'param'));
-
-        if ($route OR $route === 0) {
-            return $routes[$route];
+        if (array_key_exists($getParameter, $routes)) {
+            return $routes[$getParameter];
         }
 
         return null;
@@ -107,7 +102,7 @@ class Router
      *
      * @param string $getParameter
      *
-     * @return string
+     * @return array|null
      */
     private function getRouteWithRights(string $getParameter)
     {
@@ -115,34 +110,46 @@ class Router
         $getComment = filter_input(INPUT_GET, 'comment');
         $getUser = filter_input(INPUT_GET, 'user');
 
-        $routes = array(
-            ['param' => 'backoffice', 'class' => 'homeController', 'function' => 'viewBackoffice', 'parameters' => []],
-            ['param' => 'backofficePostsList', 'class' => 'postController', 'function' => 'backofficePostsList', 'parameters' => []],
-            ['param' => 'newPost', 'class' => 'postController', 'function' => 'newPost', 'parameters' => []],
-            ['param' => 'savePost', 'class' => 'postController', 'function' => 'savePost', 'parameters' => []],
-            ['param' => 'editPost', 'class' => 'postController', 'function' => 'editPost', 'parameters' => $getPost],
-            ['param' => 'updatePost', 'class' => 'postController', 'function' => 'updatePost', 'parameters' => $getPost],
-            ['param' => 'deletePost', 'class' => 'postController', 'function' => 'deletePost', 'parameters' => $getPost],
-            ['param' => 'saveComment', 'class' => 'commentController', 'function' => 'saveComment', 'parameters' => $getPost],
-            ['param' => 'backofficeCommentsList', 'class' => 'commentController', 'function' => 'backofficeCommentsList', 'parameters' => []],
-            ['param' => 'validComment', 'class' => 'commentController', 'function' => 'validComment', 'parameters' => $getComment],
-            ['param' => 'deleteComment', 'class' => 'commentController', 'function' => 'deleteComment', 'parameters' => $getComment],
-            ['param' => 'backofficeUsersList', 'class' => 'userController', 'function' => 'backofficeUsersList', 'parameters' => []],
-            ['param' => 'deleteUser', 'class' => 'userController', 'function' => 'deleteUser', 'parameters' => $getUser],
-            ['param' => 'editUser', 'class' => 'userController', 'function' => 'editUser', 'parameters' => $getUser],
-            ['param' => 'updateUser', 'class' => 'userController', 'function' => 'updateUser', 'parameters' => $getUser],
-            ['param' => 'newUser', 'class' => 'userController', 'function' => 'newUser', 'parameters' => []],
-            ['param' => 'saveUser', 'class' => 'userController', 'function' => 'saveUser', 'parameters' => []],
-            ['param' => 'validUser', 'class' => 'userController', 'function' => 'validUser', 'parameters' => $getUser],
-        );
+        $routes = ['viewBackoffice' => ['class' => 'home', 'parameters' => []],
+            'backofficePostsList' => ['class' => 'post', 'parameters' => []],
+            'newPost' => ['class' => 'post', 'parameters' => []],
+            'savePost' => ['class' => 'post', 'parameters' => []],
+            'editPost' => ['class' => 'post', 'parameters' => $getPost],
+            'updatePost' => ['class' => 'post', 'parameters' => $getPost],
+            'deletePost' => ['class' => 'post', 'parameters' => $getPost],
+            'saveComment' => ['class' => 'comment', 'parameters' => $getPost],
+            'backofficeCommentsList' => ['class' => 'comment', 'parameters' => []],
+            'validComment' => ['class' => 'comment', 'parameters' => $getComment],
+            'deleteComment' => ['class' => 'comment', 'parameters' => $getComment],
+            'backofficeUsersList' => ['class' => 'user', 'parameters' => []],
+            'deleteUser' => ['class' => 'user', 'parameters' => $getUser],
+            'editUser' => ['class' => 'user', 'parameters' => $getUser],
+            'updateUser' => ['class' => 'user', 'parameters' => $getUser],
+            'newUser' => ['class' => 'user', 'parameters' => []],
+            'saveUser' => ['class' => 'user', 'parameters' => []],
+            'validUser' => ['class' => 'user', 'parameters' => $getUser],];
 
-        $route = array_search($getParameter, array_column($routes, 'param'));
-
-        if ($route OR $route === 0) {
-            return $routes[$route];
+        if (array_key_exists($getParameter, $routes)) {
+            return $routes[$getParameter];
         }
 
         return null;
+    }
+
+    /**
+     * Return the controller
+     *
+     * @param string $class
+     *
+     * @return string|null
+     */
+    private function getController(string $class)
+    {
+        if (!class_exists('OpenclassroomsP5\Controllers\\' . $class . 'Controller')) {
+            return null;
+        }
+
+        return $class . 'Controller';
     }
 }
 
