@@ -19,7 +19,7 @@
                             {{ post.chapo }}
                         </div>
                         <div class="row">
-                            <a class="btn btn-outline-success btn-sm" href="index.php?p=view&post={{ post.id_post }}" role="button" id="followingBtn">Lire la suite...</a>
+                            <a class="btn btn-outline-success btn-sm" href="index.php?p=viewPost&post={{ post.id_post }}" role="button" id="followingBtn">Lire la suite...</a>
                         </div>
                     </div>
                 {% endfor %}
@@ -28,7 +28,7 @@
                 <nav>
                     <ul class="pagination">
                         {% for i in 1..nbpages %}
-                            <li class="page-item"><a class="page-link" href="index.php?p=list&page={{ i }}">{{ i }}</a></li>
+                            <li class="page-item"><a class="page-link" href="index.php?p=viewList&page={{ i }}">{{ i }}</a></li>
                         {% endfor %}
                     </ul>
                 </nav>

@@ -55,11 +55,11 @@ class PostManager extends Manager
      *
      * @return mixed
      */
-    public function getPost(int $id) {
+    public function getPost(int $postId) {
         $req = $this->dbase->prepare('SELECT posts.id as id_post, posts.title, posts.chapo, posts.author_id, DATE_FORMAT(posts.date, \'%d %M %Y\') AS date_post, posts.content, posts.image, users.id, users.name
                             FROM posts, users
                             WHERE users.id = posts.author_id AND posts.id = :id_post');
-        $req->bindParam(':id_post', $id, \PDO::PARAM_INT);
+        $req->bindParam(':id_post', $postId, \PDO::PARAM_INT);
         $req->execute();
 
         return $req->fetch();
@@ -76,16 +76,16 @@ class PostManager extends Manager
      *
      * @return bool
      */
-    public function insertPost(string $title, string $chapo, string $content, int $author_id, string $image)
+    public function insertPost(string $title, string $chapo, string $content, int $authorId, string $image)
     {
-        $date_post = date("Y-m-d H:i:s");
+        $datePost = date("Y-m-d H:i:s");
 
         $req = $this->dbase->prepare('INSERT INTO posts (title, chapo, author_id, date, content, image)
                                     VALUES (:title, :chapo, :author_id, :date_post, :content, :image)');
         $req->bindParam(':title', $title, \PDO::PARAM_STR);
         $req->bindParam(':chapo', $chapo, \PDO::PARAM_STR);
-        $req->bindParam(':author_id', $author_id, \PDO::PARAM_INT);
-        $req->bindParam(':date_post', $date_post);
+        $req->bindParam(':author_id', $authorId, \PDO::PARAM_INT);
+        $req->bindParam(':date_post', $datePost);
         $req->bindParam(':content', $content, \PDO::PARAM_STR);
         $req->bindParam(':image', $image, \PDO::PARAM_STR);
 
@@ -104,7 +104,7 @@ class PostManager extends Manager
      *
      * @return bool
      */
-    public function updatePost(int $post_id, string $title, string $chapo, string $content, int $author_id, string $image)
+    public function updatePost(int $postId, string $title, string $chapo, string $content, int $authorId, string $image)
     {
         $date_post = date('Y-m-d H:i:s');
 
@@ -113,11 +113,11 @@ class PostManager extends Manager
                                     WHERE posts.id = :post_id');
         $req->bindParam(':title', $title, \PDO::PARAM_STR);
         $req->bindParam(':chapo', $chapo, \PDO::PARAM_STR);
-        $req->bindParam(':author_id', $author_id, \PDO::PARAM_INT);
+        $req->bindParam(':author_id', $authorId, \PDO::PARAM_INT);
         $req->bindParam(':date_post', $date_post);
         $req->bindParam(':content', $content, \PDO::PARAM_STR);
         $req->bindParam(':image', $image, \PDO::PARAM_STR);
-        $req->bindParam(':post_id', $post_id, \PDO::PARAM_INT);
+        $req->bindParam(':post_id', $postId, \PDO::PARAM_INT);
 
         return $req->execute();
     }
@@ -129,11 +129,11 @@ class PostManager extends Manager
      *
      * @return bool
      */
-    public function deletePost(int $post_id)
+    public function deletePost(int $postId)
     {
         $req = $this->dbase->prepare('DELETE FROM posts 
                                     WHERE posts.id = :post_id');
-        $req->bindParam(':post_id', $post_id, \PDO::PARAM_INT);
+        $req->bindParam(':post_id', $postId, \PDO::PARAM_INT);
 
         return $req->execute();
     }

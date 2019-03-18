@@ -29,74 +29,85 @@ class UserController extends Controller
 
     /**
      * Check the connection
+     *
+     * @return bool
      */
     public function connect()
     {
-        $post_name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
-        $post_password = filter_input(INPUT_POST, 'password');
+        $postName = $this->sanitizedString('post', 'name');
+        $postPassword = $this->sanitizedString('post', 'password');
 
-        $user = $this->userManager->getUserByName($post_name);
+        $user = $this->userManager->getUserByName($postName);
 
-        if (!password_verify($post_password, $user['password'])) {
-            $this->displayError('Votre nom ou votre mot de passe sont erronnés !');
-            return;
+        if (!password_verify($postPassword, $user['password'])) {
+            $this->setErrorMessage('L\'utilisateur ou le mot de passe sont incorrects');
+            return false;
         }
 
-        $_SESSION['name'] = $post_name;
-        $_SESSION['role'] = $user['role'];
-        $_SESSION['user_id'] = $user['user_id'];
+        $this->setSessionVariable('name', $postName);
+        $this->setSessionVariable('role', $user['role']);
+        $this->setSessionVariable('user_id', $user['user_id']);
 
-        (new HomeController())->viewHome();
+        return (new HomeController())->viewHome();
     }
 
     /**
      * Disconnect a user
+     *
+     * @return bool
      */
     public function disConnect()
     {
-        $_SESSION['name'] = '';
-        $_SESSION['role'] = '';
-        (new HomeController())->viewHome();
+        session_destroy();
+        return (new HomeController())->viewHome();
     }
 
     /**
      * Displays the list of users
+     *
+     * @return bool
      */
     public function backofficeUsersList()
     {
-        $users = $this->userManager->getUsers();
-
-        $this->render('backofficeUsersList.html.twig', [
-            'users' => $users,
+          return $this->render('backofficeUsersList.html.twig', [
+            'users' => $this->userManager->getUsers(),
         ]);
     }
 
     /**
      * Delete a user
      *
-     * @param int $user_id
+     * @param int $userId
+     *
+     * @return bool
      */
-    public function deleteUser(int $user_id)
+    public function deleteUser(int $userId)
     {
-        if (!$this->userManager->deleteUser($user_id)) {
-            $this->displayError('Une erreur s\'est produite durant la suppression de l\'utilisateur !');
-
-            return;
+        if (!$this->userManager->deleteUser($userId)) {
+            $this->setErrorMessage('Impossible de supprimer l\'utilisateur.');
+            return false;
         }
 
-        $this->backofficeUsersList();
+        return $this->backofficeUsersList();
     }
 
     /**
      * Edit a user
      *
-     * @param int $user_id
+     * @param int $userId
+     *
+     * @return bool
      */
-    public function editUser(int $user_id)
+    public function editUser(int $userId)
     {
-        $user = $this->userManager->getUser($user_id);
+        $user = $this->userManager->getUser($userId);
 
-        $this->render('backofficeUserEdit.html.twig', [
+        if (!$user) {
+            $this->setErrorMessage('L\'utilisateur n\'existe pas.');
+            return false;
+        }
+
+        return $this->render('backofficeUserEdit.html.twig', [
             'user' => $user,
             'action' => 'index.php?p=updateUser',
             'header' => 'Modification de l\'utilisateur',
@@ -106,23 +117,37 @@ class UserController extends Controller
     /**
      * Update a user
      *
-     * @param int $user_id
+     * @param int $userId
+     *
+     * @return bool
      */
-    public function updateUser(int $user_id)
+    public function updateUser(int $userId)
     {
-        if (!$this->userManager->updateUser($user_id, $_POST['name'], $_POST['email'], $_POST['role'], password_hash($_POST['password'], PASSWORD_DEFAULT))) {
-            $this->displayError('Une erreur s\'est produite !');
-            return;
+        $postEmail = $this->sanitizedEmail('post', 'email');
+        $newPassword = $this->sanitizedString('post', 'password');
+        $postName = $this->sanitizedString('post', 'name');
+        $postRole = $this->sanitizedString('post', 'role');
+
+        if ($newPassword) {
+            $newPassword = password_hash($newPassword, PASSWORD_DEFAULT);
         }
-        $this->backofficeUsersList();
+
+        if (!$this->userManager->updateUser($userId, $postName, $postEmail, $postRole, $newPassword)) {
+            $this->setErrorMessage('Impossible de mettre à jour l\'utilisateur.');
+            return false;
+        }
+
+        return $this->backofficeUsersList();
     }
 
     /**
      * Create a new user
+     *
+     * @return bool
      */
     public function newUser()
     {
-        $this->render('backofficeUserEdit.html.twig', [
+        return $this->render('backofficeUserEdit.html.twig', [
             'action' => 'index.php?p=saveUser',
             'header' => 'Nouvel utilisateur',
         ]);
@@ -130,148 +155,183 @@ class UserController extends Controller
 
     /**
      * Diplays the form for a new subscription
+     *
+     * @return bool
      */
     public function subscription()
     {
-        $this->render('subscription.html.twig', [
+        return $this->render('subscription.html.twig', [
             'header' => 'Inscription',
         ]);
     }
 
     /**
      * Save the subscription
+     *
+     * @return bool
      */
     public function saveSubscription()
     {
-        if ($_POST['password'] != $_POST['password2']) {
-            $this->displayError('Les mots de passe doivent être identiques !');
-            return;
+        $postEmail = $this->sanitizedEmail('post', 'email');
+        $postPassword = $this->sanitizedString('post', 'password');
+        $postPassword2 = $this->sanitizedString('post', 'password2');
+        $postName = $this->sanitizedString('post', 'name');
+
+        if ($postPassword != $postPassword2) {
+            $this->setErrorMessage('Les mots de passe doivent être identiques !');
+            return false;
         }
 
-        if ($this->userManager->getUserByName($_POST['name'])) {
-            $this->displayError('Ce nom d\'utilisateur existe déjà !');
-            return;
+        if ($this->userManager->getUserByName($postName)) {
+            $this->setErrorMessage('Ce nom d\'utilisateur existe déjà !');
+            return false;
         }
 
-        if (!$this->userManager->insertUser($_POST['name'], $_POST['email'], 'reader', password_hash($_POST['password'], PASSWORD_DEFAULT), FALSE)) {
-            $this->displayError('Une erreur s\'est produite !');
-            return;
+        if (!$this->userManager->insertUser($postName, $postEmail, 'reader', password_hash($postPassword, PASSWORD_DEFAULT), FALSE)) {
+            $this->setErrorMessage('Impossible d\'enregistrer l\'utilisateur.');
+            return false;
         }
 
-        (new HomeController())->viewHome();
+        return (new HomeController())->viewHome();
     }
 
     /**
      * Save a new user
+     *
+     * @return bool
      */
     public function saveUser()
     {
-        if (!$this->userManager->insertUser($_POST['name'], $_POST['email'], $_POST['role'], password_hash($_POST['password'], PASSWORD_DEFAULT), TRUE)) {
-            $this->displayError('Une erreur s\'est produite !');
-            return;
+        $postEmail = $this->sanitizedEmail('post', 'email');
+        $newPassword = $this->sanitizedString('post', 'password');
+        $postName = $this->sanitizedString('post', 'name');
+        $postRole = $this->sanitizedString('post', 'role');
+
+        if (!$this->userManager->insertUser($postName, $postEmail, $postRole, password_hash($newPassword, PASSWORD_DEFAULT), TRUE)) {
+            $this->setErrorMessage('Impossible d\'enregistrer l\'utilisateur.');
+            return false;
         }
-        $this->backofficeUsersList();
+
+        return $this->backofficeUsersList();
     }
 
     /**
      * Valid a user by an admin
      *
-     * @param int $user_id
+     * @param int $userId
+     *
+     * @return bool
      */
-    public function validUser(int $user_id)
+    public function validUser(int $userId)
     {
-        if (!$this->userManager->validateUser($user_id)) {
-            $this->displayError('Une erreur s\'est produite !');
-
-            return;
+        if (!$this->userManager->validateUser($userId)) {
+            $this->setErrorMessage('Impossible de valider l\'utilisateur.');
+            return false;
         }
 
         try {
-            $user = $this->userManager->getUser($user_id);
-            $to = $user['email'];
+            $user = $this->userManager->getUser($userId);
+            $recipient = $user['email'];
             $object = 'Validation de votre inscription';
             $message = 'Votre inscription a été validée.';
-            mail($to, $object, $message);
-        } catch (\Exception $e) {
-            $this->displayError($e);
+            mail($recipient, $object, $message);
+        } catch (\Exception $exception) {
+            $this->setErrorMessage('Impossible d\'envoyer l\'email.');
+            return false;
         }
 
-        $this->backofficeUsersList();
+        return $this->backofficeUsersList();
     }
 
     /**
      * Displays the form for a forgotten password
+     *
+     * @return bool
      */
     public function forgottenPassword()
     {
-        $this->render('forgottenPassword.html.twig', []);
+        return $this->render('forgottenPassword.html.twig', []);
     }
 
     /**
      * Create the code and send an email for reinit a password
+     *
+     * @return bool
      */
     public function initPassword()
     {
-        if (!$this->userManager->getUserByName($_POST['name'])) {
-            $this->displayError('Cet utilisateur n\'existe pas !');
-            return;
+        $postName = $this->sanitizedString('post', 'name');
+
+        if (!$this->userManager->getUserByName($postName)) {
+            $this->setErrorMessage('Cet utilisateur n\'existe pas !');
+            return false;
         }
 
         $randCode = md5(uniqid('', true));
 
-        if (!$this->userManager->setInitKey($_POST['name'], $randCode)) {
-            $this->displayError('Une erreur est survenue !');
-            return;
+        if (!$this->userManager->setInitKey($postName, $randCode)) {
+            $this->setErrorMessage('Impossible de générer la clé de sécurité !');
+            return false;
         }
 
         try {
-            $user = $this->userManager->getUserByName($_POST['name']);
-            $to = $user['email'];
+            $user = $this->userManager->getUserByName($postName);
+            $recipient = $user['email'];
             $object = 'Initialisation de votre mot de passe';
             $message = 'Pour initialiser votre mot de passe, cliquez sur ce lien : ';
             $message .= DOMAIN . '/index.php?p=modifyPassword&code=' . $randCode;
-            mail($to, $object, $message);
-        } catch (\Exception $e) {
-            $this->displayError($e);
+            mail($recipient, $object, $message);
+        } catch (\Exception $exception) {
+            $this->setErrorMessage('Impossible d\'envoyer l\'email.');
+            return false;
         }
 
-        (new HomeController())->viewHome();
+        return (new HomeController())->viewHome();
     }
 
     /**
      * Displays the form for modify a password
      *
      * @param string $code
+     *
+     * @return bool
      */
     public function modifyPassword(string $code)
     {
-        $this->render('modifyPassword.html.twig', [
+        return $this->render('modifyPassword.html.twig', [
             'code' => $code,
         ]);
     }
 
     /**
      * Save the modified password
+     *
+     * @return bool
      */
     public function saveNewPassword()
     {
-        if ($_POST['password'] != $_POST['password2']) {
-            $this->displayError('Les mots de passe doivent être identiques !');
-            return;
+        $postPassword = $this->sanitizedString('post', 'password');
+        $postPassword2 = $this->sanitizedString('post', 'password2');
+        $postName = $this->sanitizedString('post', 'name');
+        $postCode = $this->sanitizedString('post', 'code');
+
+        if ($postPassword != $postPassword2) {
+            $this->setErrorMessage('Les mots de passe doivent être identiques !');
+            return false;
         }
 
-        $user = $this->userManager->getUserByName($_POST['name']);
+        $user = $this->userManager->getUserByName($postName);
 
-        if ($user['init_key'] != $_POST['code']) {
-            $this->displayError('Un problème de sécurité a été rencontré !');
-            return;
+        if ($user['init_key'] != $postCode) {
+            $this->setErrorMessage('Un problème de sécurité a été rencontré !');
+            return false;
         }
 
-        if (!$this->userManager->setPassword($_POST['name'], password_hash($_POST['password'], PASSWORD_DEFAULT))) {
-            $this->displayError('Une erreur est survenue lors de la mise à jour du mot de passe !');
-            return;
+        if (!$this->userManager->setPassword($postName, password_hash($postPassword, PASSWORD_DEFAULT))) {
+            $this->setErrorMessage('Une erreur est survenue lors de la mise à jour du mot de passe !');
+            return false;
         }
 
-        (new HomeController())->viewConnect();
+        return (new HomeController())->viewConnect();
     }
 }

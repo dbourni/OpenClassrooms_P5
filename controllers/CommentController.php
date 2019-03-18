@@ -31,72 +31,74 @@ class CommentController extends Controller
     /**
      * List the comment for a post
      *
-     * @param int $post_id
+     * @param int $postId
      *
      * @return bool|\PDOStatement
      */
-    public function listForPost(int $post_id)
+    public function listForPost(int $postId)
     {
-        return $this->commentManager->getComments($post_id);
+        return $this->commentManager->getComments($postId);
     }
 
     /**
      * Save a new comment
      *
-     * @param int $post_id
+     * @param int $postId
+     *
+     * @return bool
      */
-    public function saveComment(int $post_id)
+    public function saveComment(int $postId)
     {
-        if (!$this->commentManager->insertComment($post_id, $_POST['comment'], $_SESSION['user_id'])) {
-            $this->displayError('Une erreur s\'est produite !');
-
-            return;
+        if (!$this->commentManager->insertComment($postId, $this->sanitizedString('post', 'comment'), $this->getSessionVariable('user_id'))) {
+            return false;
         }
 
-        (new PostController())->viewPost($post_id);
+        return (new PostController())->viewPost($postId);
     }
 
     /**
      * Displays the unvalidated comments
+     *
+     * @return bool
      */
     public function backofficeCommentsList()
     {
-        $comments = $this->commentManager->getUnvalidatedComments();
-
-        $this->render('backofficeCommentsList.html.twig', [
-            'comments' => $comments,
-        ]);
+        return $this->render('backofficeCommentsList.html.twig', [
+            'comments' => $this->commentManager->getUnvalidatedComments(),
+            ]);
     }
 
     /**
      * Validate a comment
      *
-     * @param int $comment_id
+     * @param int $commentId
+     *
+     * @return bool
      */
-    public function validComment(int $comment_id)
+    public function validComment(int $commentId)
     {
-        if (!$this->commentManager->validateComment($comment_id)) {
-            $this->displayError('Une erreur s\'est produite !');
-
-            return;
+        if (!$this->commentManager->validateComment($commentId)) {
+            $this->setErrorMessage('Impossible d\'enregistrer le commentaire.');
+            return false;
         }
 
-        $this->backofficeCommentsList();
+        return $this->backofficeCommentsList();
     }
 
     /**
      * Delete a comment
      *
-     * @param int $comment_id
+     * @param int $commentId
+     *
+     * @return bool
      */
-    public function deleteComment(int $comment_id)
+    public function deleteComment(int $commentId)
     {
-        if (!$this->commentManager->deleteComment($comment_id)) {
-            $this->displayError('Une erreur s\'est produite !');
-
-            return;
+        if (!$this->commentManager->deleteComment($commentId)) {
+            $this->setErrorMessage('Impossible de supprimer le commentaire.');
+            return false;
         }
 
-        $this->backofficeCommentsList();
+        return $this->backofficeCommentsList();
     }
 }

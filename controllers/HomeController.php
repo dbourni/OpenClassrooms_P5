@@ -18,52 +18,55 @@ class HomeController extends Controller
 {
     /**
      * Displays the homepage
+     *
+     * @return bool
      */
     public function viewHome()
     {
-        $this->render('home.html.twig', []);
+        return $this->render('home.html.twig', []);
     }
 
     /**
      * Dispay the back office dashboard
+     *
+     * @return bool
      */
     public function viewBackoffice()
     {
-        $nbPosts = (new PostManager())->countPosts();
-        $nbComments = (new CommentManager())->countComments();
-        $nbUsers = (new UserManager())->countUsers();
-
-        $this->render('backoffice.html.twig', [
-            'nbArticle' => $nbPosts,
-            'nbComments' => $nbComments,
-            'nbUsers' => $nbUsers,
+        return $this->render('backoffice.html.twig', [
+            'nbArticle' => (new PostManager())->countPosts(),
+            'nbComments' => (new CommentManager())->countComments(),
+            'nbUsers' => (new UserManager())->countUsers(),
         ]);
     }
 
     /**
      * Send an email with the form
      *
-     * @param string $to
-     * @param string $name
-     * @param string $message
+     * @param array $paramForEmail
+     *
+     * @return bool
      */
-    public function sendEmail(string $to, string $name, string $message)
+    public function sendEmail(array $paramForEmail)
     {
         try {
-            $object = 'Email envoyé par le formulaire de votre site de ' . $name;
-            mail($to, $object, $message);
-            
-            echo $this->twig->render('sentemail.html.twig', []);
+            mail($paramForEmail[0], 'Email envoyé par le formulaire de votre site de ' . $paramForEmail[1], $paramForEmail[2]);
         } catch (\Exception $e) {
             $this->displayError($e);
+            $this->setErrorMessage('Votre email n\'a pas pu être envoyé.');
+            return false;
         }
+
+        return $this->render('sentemail.html.twig', []);
     }
 
     /**
      * Display the connection form
+     *
+     * @return bool
      */
     public function viewConnect()
     {
-        $this->render('connect.html.twig', []);
+        return $this->render('connect.html.twig', []);
     }
 }

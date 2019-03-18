@@ -19,13 +19,13 @@ class CommentManager extends Manager
      *
      * @return bool|\PDOStatement
      */
-    public function getComments(int $post_id)
+    public function getComments(int $postId)
     {
         $req = $this->dbase->prepare('SELECT comments.id as comment_id, DATE_FORMAT(comments.date, \'%d %M %Y - %Hh%i\') AS comment_date, comments.comment, comments.user_id, comments.post_id, users.name AS users_id
                             FROM comments, users
                             WHERE comments.post_id = :postid AND users.id = comments.user_id AND comments.validated = 1
                             ORDER BY comment_date DESC');
-        $req->bindParam(':postid', $post_id, \PDO::PARAM_INT);
+        $req->bindParam(':postid', $postId, \PDO::PARAM_INT);
         $req->execute();
 
         return $req;
@@ -54,7 +54,7 @@ class CommentManager extends Manager
      *
      * @return bool
      */
-    public function validateComment(int $comment_id)
+    public function validateComment(int $commentId)
     {
         $validated = 1;
 
@@ -62,7 +62,7 @@ class CommentManager extends Manager
                                     SET validated = :validated
                                     WHERE comments.id = :id');
         $req->bindParam(':validated', $validated, \PDO::PARAM_INT);
-        $req->bindParam(':id', $comment_id, \PDO::PARAM_INT);
+        $req->bindParam(':id', $commentId, \PDO::PARAM_INT);
 
         return $req->execute();
     }
@@ -76,15 +76,15 @@ class CommentManager extends Manager
      *
      * @return bool
      */
-    public function insertComment(int $post_id, string $comment, int $user_id)
+    public function insertComment(int $postId, string $comment, int $userId)
     {
         $comment_date = date("Y-m-d H:i:s");
         $validated = 0;
 
         $req = $this->dbase->prepare('INSERT INTO comments (user_id, post_id, date, comment, validated)
                                     VALUES (:user_id, :post_id, :comment_date, :comment, :validated)');
-        $req->bindParam(':user_id', $user_id, \PDO::PARAM_INT);
-        $req->bindParam(':post_id', $post_id, \PDO::PARAM_INT);
+        $req->bindParam(':user_id', $userId, \PDO::PARAM_INT);
+        $req->bindParam(':post_id', $postId, \PDO::PARAM_INT);
         $req->bindParam(':comment_date', $comment_date);
         $req->bindParam(':comment', $comment, \PDO::PARAM_STR);
         $req->bindParam(':validated', $validated,\PDO::PARAM_INT);
@@ -99,11 +99,11 @@ class CommentManager extends Manager
      *
      * @return bool
      */
-    public function deleteComment(int $comment_id)
+    public function deleteComment(int $commentId)
     {
         $req = $this->dbase->prepare('DELETE FROM comments 
                                     WHERE comments.id = :comment_id');
-        $req->bindParam(':comment_id', $comment_id, \PDO::PARAM_INT);
+        $req->bindParam(':comment_id', $commentId, \PDO::PARAM_INT);
 
         return $req->execute();
     }
@@ -115,11 +115,11 @@ class CommentManager extends Manager
      *
      * @return bool
      */
-    public function deleteCommentsForPost(int $post_id)
+    public function deleteCommentsForPost(int $postId)
     {
         $req = $this->dbase->prepare('DELETE FROM comments 
                                     WHERE comments.post_id = :post_id');
-        $req->bindParam(':post_id', $post_id, \PDO::PARAM_INT);
+        $req->bindParam(':post_id', $postId, \PDO::PARAM_INT);
 
         return $req->execute();
     }
