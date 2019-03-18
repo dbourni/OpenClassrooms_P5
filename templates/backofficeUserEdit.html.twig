@@ -1,0 +1,34 @@
+{% extends 'backofficeLayout.html.twig' %}
+
+{% block content %}
+    <div class="container" id="UserEdit">
+        <h1><b>{{ header }}</b></h1>
+        <form method="post" action="{{ action }}&user={{ user.user_id }}" enctype="multipart/form-data">
+            <div class="row" id="userform">
+                <div class="form-group col-sm-12">
+                    <label for="name" class="h4">Nom</label>
+                    <input type="text" class="form-control" name="name" id="name" value="{{ user.name }}" placeholder="Nom ou pseudo" required>
+                </div>
+                <div class="form-group col-sm-12">
+                    <label for="email" class="h4">Email</label>
+                    <input type="email" class="form-control" name="email" id="author" value="{{ user.email }}" placeholder="Adresse email" required>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="role" class="h4">Role</label>
+                    <select class="form-control" name="role" id="role" required>
+                        <option {{ user.role == 'reader' ? 'selected' }}>reader</option>
+                        <option {{ user.role == 'editor' ? 'selected' }}>editor</option>
+                        <option {{ user.role == 'admin' ? 'selected' }}>admin</option>
+                    </select>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="password" class="h4">Mot de passe</label>
+                    <input type="password" class="form-control" name="password" id="password" value="" {{ action != 'index.php?p=updateUser' ? 'required' }}>
+                </div>
+                <div class="form-group col-sm-12 d-flex justify-content-center">
+                    <button type="submit" id="form-submit" class="btn btn-lg rounded border-primary">Enregistrer</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

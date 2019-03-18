@@ -1,0 +1,15 @@
+{
+    "require": {
+        "twbs/bootstrap": "^4.2",
+        "twig/twig": "^2.6",
+        "ext-pdo": "*"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "OpenclassroomsP5\\":"",
+            "OpenclassroomsP5\\Controllers\\":"controllers",
+            "OpenclassroomsP5\\Models\\":"models"
+        }
+    }
+}

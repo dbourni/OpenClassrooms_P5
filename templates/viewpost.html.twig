@@ -1,0 +1,55 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <section>
+        <div class="container" id="viewpost">
+            <div class="row" id="viewpost_title">
+                <div class="col align-self-center">
+                    <h1>{{ post.title }}</h1>
+                </div>
+            </div>
+            <div class="row" id="viewpost_subtitle">
+                <div class="col align-self-center">
+                    <p><i class="far fa-user"></i> {{ post.name }} <i class="far fa-clock"></i> {{ post.date_post }}</p>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-xl-8 col-lg-10 col-md-12 col-sm-12"><img src="{{ post.image }}" alt="image_top" class="img-fluid rounded"></div>
+            </div>
+            <div class="row" id="viewpost_content">
+                <div class="col align-self-center">
+                    <p>{{ post.content|raw }}</p>
+                </div>
+            </div>
+            <div class="row" id="viewpost_title">
+                <div class="col align-self-center">
+                    <h1>Commentaires</h1>
+                </div>
+            </div>
+            {% for comment in comments %}
+                <div class="row" id="row_comment">
+                    <div class="col">
+                        <p><b><i class="far fa-user"></i> {{ comment.users_id }} <i class="far fa-clock"></i> {{ comment.comment_date }}</b></br>
+                        {{ comment.comment }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+            {% if session.role in ['admin', 'editor', 'reader'] %}
+                <div class="row justify-content-center">
+                    <div class="col-xl-8">
+                    <form method="post" action="index.php?p=saveComment&post={{ post_id }}">
+                        <div class="form-group">
+                            <label for="comment" class="h4">Votre commentaire</label>
+                            <textarea id="comment" class="form-control flex" name="comment" rows="3" required></textarea>
+                            Votre commentaire sera publié après validation. Merci de votre patience.
+                        </div>
+                        <div class="form-group col-sm-12 d-flex justify-content-center">
+                            <button type="submit" id="form-submit" class="btn btn-lg rounded border-primary">Enregistrer</button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

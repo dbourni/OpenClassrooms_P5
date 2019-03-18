@@ -1,0 +1,42 @@
+{% extends 'backofficeLayout.html.twig' %}
+
+{% block head %}
+    {{ parent() }}
+    <script language="javascript">
+        function del(id)
+        {
+            if (confirm("voulez vous supprimer?"))
+                location.replace("index.php?p=deleteComment&comment="+id);
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="container" id="PostsList">
+        <h1><b>Liste des commentaires non validés</b></h1>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Auteur / commentaire</th>
+                    <th scope="col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for comment in comments %}
+                    <tr>
+                        <td width="250px">{{ comment.comment_date }}</td>
+                        <td>{{ comment.users_name }}</br>{{ comment.comment }}</td>
+                        <td width="150px">
+                            <a href="index.php?p=validComment&comment={{ comment.comment_id }}"><i class="fas fa-check"></i></a>
+                            <a href="javascript:del({{ comment.comment_id }})"><i class="fas fa-trash-alt"></i></a>
+                            <a href="index.php?p=viewPost&post={{ comment.post_id }}" target="_blank"><i class="far fa-eye"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
